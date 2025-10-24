@@ -1,0 +1,315 @@
+/* =========================================
+   Cute & Friendly Theme for Kids
+   ========================================= */
+
+/* Use fun, rounded fonts */
+body {
+    font-family: 'Nunito', sans-serif; /* A great, readable font for body text */
+    background-color: #f0f8ff; /* AliceBlue - a very light, soft blue */
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23aeeeee' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+h1, h2, h3, .font-bold {
+    font-family: 'Baloo 2', cursive; /* A playful, bold font with full Vietnamese support */
+    color: #3b5998; /* A friendly, dark blue */
+}
+
+/* Softer, "bouncier" cards */
+.card {
+    background-color: white;
+    border-radius: 2rem;
+    border: 3px solid #dfefff;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05), 0 0 0 5px white, 0 0 0 8px #dfefff;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+}
+
+/* A fun, "squishy" primary button */
+.btn-primary {
+    background-image: linear-gradient(to right, #89f7fe 0%, #66a6ff 100%);
+    border-radius: 50px;
+    border: none;
+    padding: 1rem 2rem;
+    font-family: 'Baloo 2', cursive;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 10px rgba(102, 166, 255, 0.5);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(102, 166, 255, 0.6);
+}
+
+.btn-primary:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 5px rgba(102, 166, 255, 0.5);
+}
+
+/* MỚI: Nút phụ (Secondary button) cho bài tổng hợp */
+.btn-secondary {
+    background-image: linear-gradient(to right, #f789ff 0%, #ff66a6 100%);
+    border-radius: 50px;
+    border: none;
+    padding: 1rem 2rem;
+    font-family: 'Baloo 2', cursive;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 10px rgba(255, 102, 166, 0.5);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(255, 102, 166, 0.6);
+}
+
+.btn-secondary:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 5px rgba(255, 102, 166, 0.5);
+}
+
+
+/* Add a happy little mascot animation */
+.header-mascot {
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20px);
+    }
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Style for question blocks */
+.quiz-question {
+    border-left: 5px solid #ffcc80; /* Soft orange */
+    background-color: #fff9f0;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    animation: pop-in 0.5s ease-out;
+}
+
+@keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Styles for result items */
+.result-item.correct {
+    border-left: 5px solid #a5d6a7; /* Soft green */
+    background-color: #f1f8e9;
+}
+
+.result-item.incorrect {
+    border-left: 5px solid #ef9a9a; /* Soft red */
+    background-color: #ffefef;
+}
+
+/* Make checkboxes look like cute little toggles */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 40px;
+    height: 24px;
+    background-color: #e0e0e0;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #81c784; /* Green when checked */
+}
+
+input[type="checkbox"]:checked::before {
+    transform: translateX(16px);
+}
+
+/* Feedback section in results */
+#result-feedback {
+    background: #e3f2fd; /* Light blue background */
+    border: 2px dashed #90caf9;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+}
+
+/* MỚI: Style cho Chứng nhận (BẢN GỐC) */
+#certificate-wrapper-old { /* Đổi tên để không bị ảnh hưởng */
+    border: 10px solid #d4af37; /* Gold border */
+    border-image: linear-gradient(to right, #b8860b, #fde3a7, #b8860b) 1;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* MỚI: Font chữ ký
+   (Đã thêm 'Great Vibes' vào thẻ <link> trong HTML) */
+.font-signature {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2.5rem;
+    color: #333;
+}
+
+/* MỚI: Hiệu ứng pháo hoa cho confetti (ĐÃ BỊ XÓA) */
+/*
+@keyframes confetti-fall {
+    ...
+}
+.confetti {
+    ...
+}
+.confetti.square {
+    ...
+}
+.confetti.circle {
+    ...
+}
+*/
+
+/* In ấn */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: none;
+        padding: 0;
+    }
+    .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        border-radius: 0;
+    }
+    #display-area {
+        padding: 0;
+    }
+    .quiz-question {
+        page-break-inside: avoid;
+    }
+    
+    /* MỚI: Style in cho Chứng nhận */
+    #certificate-wrapper-old { /* Đổi tên để không bị ảnh hưởng */
+        width: 100%;
+        height: 100%;
+        border: 10px solid #000;
+        background: #fff;
+    }
+    .certificate-content-old { /* Đổi tên để không bị ảnh hưởng */
+        background-color: #fff !important;
+        backdrop-filter: none !important;
+    }
+}
+
+
+/* =========================================
+   CẬP NHẬT CHỨNG NHẬN (CSS-ONLY)
+   ========================================= */
+
+#certificate-wrapper {
+    /* Bỏ border-image, dùng double border */
+    border: 3px solid #b8860b; /* Viền vàng đậm bên trong */
+    box-shadow: 0 0 0 10px #d4af37; /* Viền vàng nhạt bên ngoài */
+    background: #fdfaf0; /* Màu giấy da */
+    background-image: linear-gradient(to bottom, #fdfaf0 0%, #f7f3e8 100%); /* Thêm gợn giấy */
+}
+
+/* Ghi đè style inline (nếu có) để đảm bảo nền trắng */
+.certificate-content {
+    background-color: #ffffff !important; 
+    backdrop-filter: none !important;
+}
+
+/* Thay thế cho ảnh con dấu */
+#certificate-seal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    /* Dùng gradient để tạo vẻ sáng kim loại */
+    background: radial-gradient(circle, #fde3a7 0%, #d4af37 70%, #b8860b 100%);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3), 
+                inset 0 0 10px rgba(0,0,0,0.1),
+                inset 0 0 5px rgba(255,255,255,0.5); /* Tạo độ nổi 3D */
+}
+
+/* Ngôi sao bên trong con dấu */
+#certificate-seal::before {
+    content: '★';
+    font-size: 50px; /* (w-24 là 96px, 50px là vừa) */
+    color: #b8860b; /* Màu sao vàng đậm */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Chữ ký của AI */
+#ai-signature {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2.5rem;
+    color: #333;
+    line-height: 1; /* Giảm chiều cao dòng cho font chữ ký */
+    margin-bottom: 0;
+}
+
+/* Đường kẻ chữ ký */
+.signature-line {
+    border: 0;
+    border-top: 2px solid #888;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+}
+
+/* Cập nhật style in ấn cho các thành phần CSS mới */
+@media print {
+     #certificate-wrapper {
+        background: #fff !important; /* In nền trắng */
+        border: 10px solid #000;
+        box-shadow: none;
+     }
+     #certificate-seal {
+        background: #ccc !important; /* In thường không hỗ trợ gradient */
+        border: 2px solid #000;
+        /* Bỏ shadow khi in */
+        box-shadow: none; 
+     }
+     #certificate-seal::before {
+        color: #000;
+        text-shadow: none;
+     }
+     #ai-signature {
+        color: #000;
+     }
+     .signature-line {
+        border-top: 2px solid #000;
+     }
+}

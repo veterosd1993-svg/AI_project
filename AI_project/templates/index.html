@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình Tạo Bài Kiểm Tra AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Nunito:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3408/3408426.png" type="image/png">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8 no-print">
+            <img src="https://i.gifer.com/Pak.gif" alt="Linh vật AI" class="w-32 h-32 mx-auto mb-4 header-mascot rounded-full">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">
+                 Trình Tạo Bài Kiểm Tra <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">AI</span>
+            </h1>
+            <p class="text-gray-600 mt-2">Tạo, làm và nhận giải thích bài kiểm tra với sức mạnh của Gemini!</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div id="control-panel" class="lg:col-span-1 card p-6 no-print">
+                <h2 class="text-2xl font-bold mb-6 text-gray-700 border-b-2 pb-2 border-gray-100">Bảng điều khiển</h2>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="student-name" class="block mb-2 font-semibold text-gray-700">Tên học sinh</label>
+                        <input type="text" id="student-name" placeholder="Nguyễn Văn A" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400">
+                    </div>
+                    <div>
+                        <label for="student-class" class="block mb-2 font-semibold text-gray-700">Lớp</label>
+                        <input type="text" id="student-class" placeholder="Lớp 5A" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400">
+                    </div>
+                </div>
+                
+                <hr class="my-6 border-gray-200">
+
+                <div class="mb-4">
+                    <label for="grade-select" class="block mb-2 font-semibold text-gray-700">1. Chọn khối lớp</label>
+                    <select id="grade-select" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition">
+                        <option value="1">Lớp 1</option>
+                        <option value="2">Lớp 2</option>
+                        <option value="3">Lớp 3</option>
+                        <option value="4">Lớp 4</option>
+                        <option value="5" selected>Lớp 5</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label for="unit-select" class="block mb-2 font-semibold text-gray-700">2. Chọn Unit</label>
+                    <select id="unit-select" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition">
+                        </select>
+                </div>
+
+                <div class="mb-8">
+                    <p class="block mb-3 font-semibold text-gray-700">3. Tùy chọn dạng bài</p>
+                    <div id="question-types" class="space-y-3">
+                        </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button id="generate-btn" class="w-full btn-primary text-white font-bold py-4 px-4 rounded-xl text-lg flex items-center justify-center gap-x-2">
+                        <i class="fas fa-magic"></i> Tạo bài tùy chọn
+                    </button>
+                    <button id="generate-comprehensive-btn" class="w-full btn-secondary text-white font-bold py-4 px-4 rounded-xl text-lg flex items-center justify-center gap-x-2">
+                        <i class="fas fa-star"></i> Tạo bài Tổng hợp
+                    </button>
+                </div>
+            </div>
+
+            <div id="display-area" class="lg:col-span-2 card p-6 md:p-8">
+                
+                <div id="placeholder" class="text-center py-16">
+                    <img src="https://i.gifer.com/6mz.gif" alt="Linh vật sẵn sàng" class="w-32 h-32 mx-auto mb-4 opacity-70">
+                    <p class="mt-4 text-gray-500">Bài kiểm tra sẽ xuất hiện ở đây.</p>
+                </div>
+                
+                <div id="loading" class="text-center py-16 hidden">
+                    <img src="https://i.gifer.com/6mz.gif" alt="Linh vật AI đang suy nghĩ" class="w-32 h-32 mx-auto mb-4 header-mascot rounded-full">
+                    <p id="loading-text" class="mt-4 text-gray-500">AI đang tạo bài kiểm tra...</p>
+                </div>
+                
+                <div id="error-message" class="text-center py-16 hidden">
+                     <img src="https://cdn-icons-png.flaticon.com/512/6659/6659828.png" alt="Lỗi" class="w-32 h-32 mx-auto mb-4 rounded-full">
+                    <p id="error-text" class="mt-4 text-red-500 font-semibold"></p>
+                </div>
+                
+                <div id="quiz-wrapper" class="hidden">
+                    <div id="printable-section">
+                        <div id="quiz-header" class="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-100">
+                             <h2 class="text-2xl font-bold text-gray-700">Làm bài kiểm tra</h2>
+                        </div>
+                        <div id="quiz-body" class="text-gray-800 space-y-8"></div>
+                    </div>
+                    <div class="mt-8 flex justify-between items-center no-print">
+                        <button id="submit-btn" class="btn-primary text-white font-bold py-3 px-6 rounded-xl text-lg">Nộp bài</button>
+                        <button id="print-btn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center space-x-2">
+                            <i class="fas fa-print"></i>
+                            <span>In bài</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="result-wrapper" class="hidden">
+                    <div id="result-header" class="text-center mb-6 border-b-2 pb-4 border-gray-100">
+                        <div id="result-image-container" class="mb-4"></div>
+                        <h2 class="text-3xl font-bold text-gray-800">Kết quả bài làm</h2>
+                        <p id="score" class="text-2xl font-semibold text-blue-600 mt-2"></p>
+                        
+                        <div id="result-feedback" class="mt-4 text-center p-4 bg-gray-50 rounded-lg">
+                            </div>
+                    </div>
+                    <div id="result-body" class="space-y-6">
+                        </div>
+                    
+                    <div class="mt-8 text-center no-print flex justify-center gap-x-4">
+                        <button id="reset-btn" class="btn-primary text-white font-bold py-3 px-6 rounded-xl text-lg">Làm bài khác</button>
+                        
+                        <button id="back-to-panel-btn" 
+                                class="bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl text-lg hover:bg-gray-300 transition">
+                            Về bảng điều khiển
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="certificate-wrapper" class="hidden p-8 relative"> <div class="certificate-content text-center text-gray-800 p-8"> <div id="certificate-seal" class="w-24 h-24 mx-auto mb-4"></div>
+                        
+                        <h2 class="text-6xl mb-6" style="font-family: 'Great Vibes', cursive; color: #d4af37;">
+                            Congratulations!
+                        </h2>
+                        
+                        <p class="text-xl mb-4">Chứng nhận này được trao cho:</p>
+                        
+                        <h3 id="certificate-name" class="text-4xl font-bold text-gray-800 mb-2">
+                            [Tên học sinh]
+                        </h3>
+                        
+                        <p class="text-lg mb-6">Lớp: <span id="certificate-class" class="font-semibold">[Lớp]</span></p>
+                        
+                        <p class="text-lg mb-8">
+                            Đã hoàn thành xuất sắc bài kiểm tra tổng hợp<br>
+                            <strong id="certificate-unit" class="text-xl">[Tên Unit]</strong>
+                        </p>
+                        
+                        <div class="flex justify-between items-center w-full max-w-md mx-auto text-sm">
+                            <div>
+                                <p class="text-gray-600" id="certificate-date">[Ngày tháng]</p>
+                                <hr class="signature-line mt-1">
+                                <p class="font-semibold">Ngày cấp</p>
+                            </div>
+                            <div>
+                                <p id="ai-signature">AI Tutor</p>
+                                <hr class="signature-line mt-1">
+                                <p class="font-semibold">Giáo viên AI</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 text-center no-print">
+                        <button id="retake-quiz-btn" class="btn-primary text-white font-bold py-3 px-6 rounded-xl text-lg">Làm bài khác</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
