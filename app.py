@@ -606,24 +606,34 @@ def generate_quiz():
 Act as a strict JSON-generating expert English teacher for {grade}th-grade students in Vietnam.
 Your task is to generate a quiz for: **{unit_name}**.
 
-**CRITICAL RULE:** All generated questions MUST STRICTLY and EXCLUSIVELY use the vocabulary, grammatical structures, and reflect the phonics/stress patterns specified below for this Unit. For Grade 1, focus on simple vocabulary recognition and sentence patterns.
+**CRITICAL RULE:** All generated questions MUST STRICTLY and EXCLUSIVELY use the vocabulary, grammatical structures, 
+and reflect the phonics/stress patterns specified below for this Unit. For Grade 1, focus on simple vocabulary recognition and sentence patterns.
 
 **DIFFICULTY LEVEL GUIDELINES (Apply gently for Grade 1):**
 - **Dễ (Easy):** Direct recall. Use vocabulary and structures in their simplest form (e.g., "What is this? - It is a book.").
 - **Trung bình (Medium):** Simple inference or combining concepts (e.g., "I have a [book/car]." or matching "Cc" to "cat").
 - **Khó (Hard):** Understanding simple context, unscrambling 3-word sentences. For multiple-choice, distractors should be plausible (e.g., other vocabulary from the same unit).
 
-**CRITICAL RULE 2 (NO AMBIGUITY):** For all multiple-choice questions ('mcq' and within 'reading'), there must be only ONE single, unambiguously correct answer. The other three options (distractors) must be clearly and definitively wrong.
+**CRITICAL RULE 2 (NO AMBIGUITY):** For all multiple-choice questions ('mcq' and within 'reading'), 
+there must be only ONE single, unambiguously correct answer. The other three options (distractors) must be clearly and definitively wrong.
 
-**CRITICAL RULE 3 (NO SUBJECTIVITY):** Do NOT generate subjective questions (e.g., "What's your favourite...", "What do you like...", "What about you?"). All questions MUST be objective with a single, verifiable correct answer based on the curriculum.
-- **Bad Example (Subjective):** "What's your favourite colour?" (A. red, B. blue, C. green)
-- **Good Example (Objective):** "The sky is blue. What colour is it?" (A. red, B. blue, C. green)
-- **Good Example (Objective):** "A: What's your hobby? B: I like ___. I often read books." (A. reading, B. swimming, C. cooking)
+**CRITICAL RULE 3 (NO SUBJECTIVITY - ALL TYPES):** Absolutely NO subjective questions asking about personal preferences, likes, 
+favorites, or opinions (e.g., "What's your favourite...", "Do you like...", "My favourite is ___.", "I like to ___."). 
+This applies strictly to ALL question types, including 'mcq', 'fill', and 'writing'. All questions and required answers MUST be objective 
+and verifiable based ONLY on the provided curriculum data or explicit context within the question itself.
 
 **CRITICAL RULE 4 (UNIQUE MATCHING ITEMS):** For 'match' questions, ALL items in the left column ('q' in pairs) MUST be unique, and ALL items in the right column ('a' in pairs) MUST be unique. Do NOT repeat items within the same column.
 - **Bad Example (Duplicate 'a'):** pairs: [{{"q": "Hi, I'm", "a": "Bill"}}, {{"q": "Bye,", "a": "Bill"}}]
 - **Good Example:** pairs: [{{"q": "Hi, I'm Bill.", "a": "Greeting"}}, {{"q": "Bye, Bill.", "a": "Farewell"}}]
 
+**REVISED CRITICAL RULE 5 (CONTEXTUAL & OBJECTIVE BLANKS - FILL/WRITING):** For BOTH 'fill' questions (with '___') and 'writing' questions involving sentence completion, the sentence MUST provide sufficient specific context clues so that ONLY ONE logical and objective answer from the unit's vocabulary fits the blank. Do NOT create blanks that rely on general knowledge, personal preference, or subjective descriptions (like 'beautiful', 'nice', 'favorite', 'like').
+    - Bad (Subjective Fill): 'My favourite food is ___.'
+    - Bad (Ambiguous Writing): 'This is a beautiful color. It's ___.'
+    - Bad (Subjective Writing): 'I like to play sport. My favourite is ___.'
+    - Good (Contextual Fill): 'A ___ flies in the sky.' (Answer: kite)
+    - Good (Contextual Writing): 'Look at the apple. It's ___.' (Answer: red)
+    - Good (Contextual Writing): 'He works on a farm. He is a ___.' (Answer: farmer)
+        
 **CURRICULUM DATA FOR THIS SPECIFIC UNIT ({unit_name}):**
 ---
 - **Vocabulary/Phonics:** {unit_data["vocabulary"]}
