@@ -1,4 +1,4 @@
-// static/js/script.js (Nâng cấp hỗ trợ nhiều khối lớp + Chứng nhận)
+// static/js/script.js (Nâng cấp hỗ trợ nhiều khối lớp + Chứng nhận + Gửi Google Sheet)
 // ĐÃ BỎ HIỆU ỨNG PHÁO HOA (CONFETTI)
 // ĐÃ THÊM NÚT "VỀ BẢNG ĐIỀU KHIỂN"
 
@@ -648,6 +648,37 @@ function displayCertificate(studentName, studentClass, unitName) {
 }
 
 /**
+ * MỚI: Hàm riêng để gửi kết quả cho giáo viên (Google Sheet)
+ * (Chúng ta không cần 'await' hàm này, để học sinh không phải chờ)
+ */
+async function sendResultsToTeacher(name, studentClass, score, total, results) {
+    console.log("Đang gửi kết quả cho giáo viên...");
+    try {
+        const response = await fetch('/submit-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                studentClass: studentClass,
+                score: score,
+                total: total,
+                results: results // Gửi mảng kết quả chi tiết cho AI phân tích
+            }),
+        });
+        
+        if (response.ok) {
+            console.log("✅ Kết quả đã được gửi cho giáo viên.");
+        } else {
+            const err = await response.json();
+            console.error("❌ Lỗi khi gửi kết quả:", err.error);
+        }
+    } catch (error) {
+        console.error("❌ Lỗi mạng khi gửi kết quả:", error);
+    }
+}
+
+
+/**
  * CẬP NHẬT: Logic chấm điểm và hiển thị chứng nhận
  */
 async function handleSubmit() {
@@ -727,6 +758,18 @@ async function handleSubmit() {
     });
 
     const scorePercent = totalQuestionsInQuiz > 0 ? (score / totalQuestionsInQuiz) : 0;
+    
+    // *** LOGIC MỚI: GỬI ĐIỂM TỚI GOOGLE SHEET ***
+    // Gửi kết quả về cho giáo viên NẾU là bài tổng hợp
+    if (isComprehensiveTest) {
+        sendResultsToTeacher(
+            dom.studentNameInput.value,
+            dom.studentClassInput.value,
+            score,
+            totalQuestionsInQuiz,
+            results // Gửi mảng kết quả chi tiết
+        );
+    }
     
     // *** LOGIC MỚI: KIỂM TRA ĐỂ CẤP CHỨNG NHẬN ***
     if (isComprehensiveTest && scorePercent >= 0.8) {

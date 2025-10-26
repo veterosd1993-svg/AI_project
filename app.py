@@ -1,4 +1,4 @@
-# app.py (Nâng cấp hỗ trợ nhiều khối lớp)
+# app.py (Nâng cấp hỗ trợ nhiều khối lớp + Google Sheets)
 
 import os
 import json
@@ -6,6 +6,9 @@ import re
 import google.generativeai as genai
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
+import gspread # <-- MỚI: Thư viện Google Sheets
+from google.oauth2.service_account import Credentials # <-- MỚI: Để xác thực
+from datetime import datetime # <-- MỚI: Để lấy ngày giờ
 
 load_dotenv()
 app = Flask(__name__)
@@ -16,15 +19,38 @@ except KeyError:
     print("Lỗi: Không tìm thấy GEMINI_API_KEY. Vui lòng tạo file .env và thêm key vào.")
     exit()
 
+# === CẤU HÌNH GOOGLE SHEETS (MỚI) ===
+try:
+    # Phạm vi truy cập của Service Account
+    SCOPE = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file"
+    ]
+    # Tải thông tin xác thực từ file credentials.json
+    CREDS = Credentials.from_service_account_file('credentials.json', scopes=SCOPE)
+    GSPREAD_CLIENT = gspread.authorize(CREDS)
+    
+    # Mở Google Sheet bằng TÊN CHÍNH XÁC của file Sheet bạn đã tạo
+    # !!! THAY TÊN NÀY bằng tên Sheet của bạn
+    SHEET_ID = "1s-Zcp-Q0RoFTLAkAtE0a02gYAXWNFDPjwzAlOgx-qJ8" 
+    SHEET = GSPREAD_CLIENT.open_by_key(SHEET_ID).sheet1
+    
+    print("✅ Đã kết nối thành công với Google Sheets.")
+except FileNotFoundError:
+    print("❌ LỖI: Không tìm thấy file 'credentials.json'.")
+    print("Vui lòng tải file JSON từ Google Cloud và đổi tên thành 'credentials.json'")
+    SHEET = None
+except Exception as e:
+    print(f"❌ LỖI KẾT NỐI GOOGLE SHEETS: {e}")
+    print("Hãy đảm bảo bạn đã chia sẻ Sheet cho email trong file credentials.json")
+    SHEET = None
+# ========================================
+
+
 # ==========================================================
-# CƠ SỞ DỮ LIỆU CHƯƠNG TRÌNH HỌC TRUNG TÂM (MỚI)
+# CƠ SỞ DỮ LIỆU CHƯƠNG TRÌNH HỌC TRUNG TÂM
 # ==========================================================
-# Chứa toàn bộ từ vựng, cấu trúc, trọng âm cho mọi khối lớp.
-# Tên của Unit (ví dụ: "Unit 1: All about me!") PHẢI KHỚP
-# chính xác với giá trị trong tệp script.js
-#
-# DỮ LIỆU LỚP 1 ĐÃ ĐƯỢC CẬP NHẬT DỰA TRÊN ẢNH BOOK MAP
-# ==========================================================
+# (Giữ nguyên toàn bộ CURRICULUM_DATA của bạn ở đây)
 CURRICULUM_DATA = {
     "1": {
         # === BẮT ĐẦU DỮ LIỆU LỚP 1 (ĐÃ ĐƯỢC CẬP NHẬT) ===
@@ -580,8 +606,6 @@ def generate_quiz():
         # Lấy dữ liệu cụ thể cho unit này
         unit_data = CURRICULUM_DATA[grade][unit_name]
         
-        # (Xóa kiểm tra "CHƯA CÓ" vì chúng ta đã điền rồi)
-
         # --- Xây dựng chuỗi yêu cầu ---
         request_descriptions = []
         for req in types_requests:
@@ -663,11 +687,15 @@ Based on the curriculum data above, please generate a quiz with the following co
 The final structure MUST be: {{"questions": [...]}}.
 """
         
+        # Yêu cầu AI trả về JSON
         model = genai.GenerativeModel('gemini-2.5-flash')
+        config = genai.GenerationConfig(response_mime_type="application/json")
         request_options = {"timeout": 180}
-        response = model.generate_content(prompt, request_options=request_options)
         
-        cleaned_text = extract_json_from_text(response.text)
+        response = model.generate_content(prompt, generation_config=config, request_options=request_options)
+        
+        # response.text giờ đã là chuỗi JSON thuần
+        cleaned_text = response.text 
 
         if not cleaned_text:
             print(f"Gemini response could not be cleaned:\n{response.text}")
@@ -704,11 +732,13 @@ Provide a very simple, short, encouraging explanation in Vietnamese appropriate 
 Return a valid JSON object: {{"explanation": "Your explanation here"}}. Do not include markdown.
 """
         
-        model = genai.GenerativeModel('gemini-2.5-flash') # Đã sửa lỗi typo ở đây
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        config = genai.GenerationConfig(response_mime_type="application/json") # Yêu cầu JSON
         request_options = {"timeout": 120}
-        response = model.generate_content(prompt, request_options=request_options)
         
-        cleaned_text = extract_json_from_text(response.text)
+        response = model.generate_content(prompt, generation_config=config, request_options=request_options)
+        
+        cleaned_text = response.text # response.text là JSON
         if not cleaned_text:
             return jsonify({'explanation': 'Lỗi: AI trả về định dạng không hợp lệ.'})
 
@@ -718,6 +748,82 @@ Return a valid JSON object: {{"explanation": "Your explanation here"}}. Do not i
     except Exception as e:
         print(f"An error occurred during explanation generation: {e}")
         return jsonify({'error': str(e)}), 500
+
+# === HÀM MỚI: DÙNG AI TẠO NHẬN XÉT TỔNG QUAN ===
+def generate_holistic_feedback(results, score, total):
+    """
+    Dùng AI để tạo nhận xét tổng quan dựa trên kết quả.
+    """
+    try:
+        # Chuẩn bị dữ liệu cho AI
+        incorrect_questions = []
+        for res in results:
+            if not res['isCorrect']:
+                incorrect_questions.append({
+                    "question": res['question'],
+                    "user_answer": res['userAnswer'],
+                    "correct_answer": res['correctAnswer']
+                })
+        
+        # Tạo một prompt mới
+        prompt = f"""
+        Một học sinh vừa hoàn thành bài kiểm tra với điểm số là {score}/{total}.
+        Dưới đây là chi tiết các câu làm sai:
+        {json.dumps(incorrect_questions, indent=2, ensure_ascii=False)}
+
+        Hãy đóng vai là một giáo viên tiếng Anh, viết một đoạn nhận xét ngắn (khoảng 2-3 câu) bằng tiếng Việt để gửi cho giáo viên chủ nhiệm (lưu vào Google Sheet).
+        Đoạn nhận xét cần:
+        1. Bắt đầu bằng việc công nhận nỗ lực (ví dụ: "Em đã cố gắng..." hoặc "Kết quả của em ở mức..." dựa trên điểm số).
+        2. Chỉ ra một điểm mạnh (nếu có) hoặc một điểm yếu chính (ví dụ: "Em cần chú ý hơn về phần viết câu/sắp xếp từ").
+        3. Đưa ra một lời khuyên ngắn gọn.
+
+        Chỉ trả về đoạn nhận xét, không thêm lời chào hay bất cứ thứ gì khác.
+        """
+
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        response = model.generate_content(prompt)
+        
+        return response.text.strip()
+
+    except Exception as e:
+        print(f"Lỗi khi tạo nhận xét AI: {e}")
+        return "Không thể tạo nhận xét tự động."
+# ============================================
+
+# === ENDPOINT MỚI ĐỂ NHẬN ĐIỂM VÀ LƯU VÀO SHEET ===
+@app.route('/submit-score', methods=['POST'])
+def submit_score():
+    # Kiểm tra xem Sheet đã được kết nối thành công chưa
+    if not SHEET:
+        return jsonify({'error': 'Máy chủ chưa kết nối được với Google Sheets.'}), 500
+
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        student_class = data.get('studentClass')
+        score = data.get('score')
+        total = data.get('total')
+        results_array = data.get('results') # Mảng chi tiết các câu trả lời
+
+        # Bước 1: Dùng AI tạo nhận xét tổng quan
+        ai_feedback = generate_holistic_feedback(results_array, score, total)
+
+        # Bước 2: Ghi vào Google Sheet
+        score_str = f"{score}/{total}"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Thêm hàng mới vào Sheet
+        # Thứ tự phải khớp với các cột của bạn
+        # Ví dụ: Cột A: Tên, Cột B: Lớp, Cột C: Điểm, Cột D: Nhận xét, Cột E: Ngày nộp
+        new_row = [name, student_class, score_str, ai_feedback, timestamp]
+        SHEET.append_row(new_row)
+
+        return jsonify({'status': 'success', 'feedback_generated': ai_feedback})
+
+    except Exception as e:
+        print(f"Lỗi khi submit_score: {e}")
+        return jsonify({'error': str(e)}), 500
+# ==================================================
 
 from waitress import serve
 if __name__ == "__main__":
