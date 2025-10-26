@@ -1,6 +1,7 @@
-// static/js/script.js (Nâng cấp hỗ trợ nhiều khối lớp + Chứng nhận + Gửi Google Sheet)
+// static/js/script.js (Nâng cấp hỗ trợ nhiều khối lớp + Chứng nhận + Google Sheet)
 // ĐÃ BỎ HIỆU ỨNG PHÁO HOA (CONFETTI)
 // ĐÃ THÊM NÚT "VỀ BẢNG ĐIỀU KHIỂN"
+// CẬP NHẬT: Luôn hiển thị kết quả, chỉ hiện nút chứng nhận khi đạt
 
 const dom = {
     controlPanel: document.getElementById('control-panel'),
@@ -44,7 +45,8 @@ const dom = {
     certificateClass: document.getElementById('certificate-class'),
     certificateUnit: document.getElementById('certificate-unit'),
     certificateDate: document.getElementById('certificate-date'),
-    retakeQuizBtn: document.getElementById('retake-quiz-btn') // Nút làm lại bài trên chứng nhận
+    retakeQuizBtn: document.getElementById('retake-quiz-btn'), // Nút làm lại bài trên chứng nhận
+    viewCertificateBtn: document.getElementById('view-certificate-btn') // <-- Nút xem chứng nhận từ màn hình kết quả
 };
 
 let generatedQuestions = [];
@@ -771,42 +773,41 @@ async function handleSubmit() {
         );
     }
     
-    // *** LOGIC MỚI: KIỂM TRA ĐỂ CẤP CHỨNG NHẬN ***
+    // *** BỎ CẤU TRÚC IF/ELSE VÀ LUÔN HIỂN THỊ KẾT QUẢ ***
+    
+    // Luôn hiển thị điểm và giải thích
+    dom.score.textContent = `Bạn đã đúng ${score}/${totalQuestionsInQuiz} câu!`;
+    displayFeedback(score, totalQuestionsInQuiz);
+    setUIState('resultWrapper'); // Luôn hiển thị màn hình kết quả
+    displayResults(results);
+    
+    // Tải giải thích cho các câu sai
+    results.forEach(async (res, index) => {
+        if (!res.isCorrect) {
+            const explanationEl = document.getElementById(`explanation-${index}`);
+            if (!explanationEl) return;
+            try {
+                const result = await getExplanation(res.question, res.userAnswer, res.correctAnswer);
+                explanationEl.innerHTML = `<b>Giải thích:</b> ${result.explanation}`;
+            } catch (error) {
+                explanationEl.innerHTML = `Không thể tải giải thích.`;
+            }
+        }
+    });
+
+    // *** LOGIC MỚI: HIỂN THỊ NÚT CHỨNG NHẬN NẾU ĐẠT ***
     if (isComprehensiveTest && scorePercent >= 0.8) {
-        // Lấy tên và lớp từ input
+        // Chuẩn bị dữ liệu cho chứng nhận
         const studentName = dom.studentNameInput.value || 'Học sinh xuất sắc';
         const studentClass = dom.studentClassInput.value || 'Lớp';
         const unitName = dom.unitSelect.value;
-        
         displayCertificate(studentName, studentClass, unitName);
-        setUIState('certificateWrapper');
-        // launchConfetti(); // (ĐÃ BỎ)
         
+        // Hiển thị nút "Xem Chứng nhận"
+        dom.viewCertificateBtn.classList.remove('hidden');
     } else {
-        // Logic cũ: Hiển thị điểm và giải thích
-        dom.score.textContent = `Bạn đã đúng ${score}/${totalQuestionsInQuiz} câu!`;
-        displayFeedback(score, totalQuestionsInQuiz);
-        setUIState('resultWrapper');
-        displayResults(results);
-        
-        // Chỉ bắn pháo hoa nếu điểm cao (>= 80%) nhưng KHÔNG phải bài tổng hợp
-        if (scorePercent >= 0.8) {
-            // launchConfetti(); // (ĐÃ BỎ)
-        }
-
-        // Tải giải thích cho các câu sai
-        results.forEach(async (res, index) => {
-            if (!res.isCorrect) {
-                const explanationEl = document.getElementById(`explanation-${index}`);
-                if (!explanationEl) return;
-                try {
-                    const result = await getExplanation(res.question, res.userAnswer, res.correctAnswer);
-                    explanationEl.innerHTML = `<b>Giải thích:</b> ${result.explanation}`;
-                } catch (error) {
-                    explanationEl.innerHTML = `Không thể tải giải thích.`;
-                }
-            }
-        });
+        // Ẩn nút nếu không đạt
+        dom.viewCertificateBtn.classList.add('hidden');
     }
 }
 
@@ -818,6 +819,12 @@ function handleReset() {
     generatedQuestions = [];
     totalQuestionsInQuiz = 0;
     isComprehensiveTest = false; // Reset cờ
+    
+    // Ẩn nút chứng nhận khi reset
+    if (dom.viewCertificateBtn) { 
+        dom.viewCertificateBtn.classList.add('hidden');
+    }
+
     // Hiện lại control panel
     dom.controlPanel.classList.remove('hidden');
 }
@@ -856,6 +863,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.retakeQuizBtn.addEventListener('click', handleReset);
     }
     
+    // MỚI: Gắn listener cho nút xem chứng nhận
+    if (dom.viewCertificateBtn) {
+        dom.viewCertificateBtn.addEventListener('click', () => {
+            setUIState('certificateWrapper');
+        });
+    }
+
     // 4. Đặt trạng thái ban đầu
     setUIState('placeholder');
 });

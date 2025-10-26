@@ -641,10 +641,12 @@ and reflect the phonics/stress patterns specified below for this Unit. For Grade
 **CRITICAL RULE 2 (NO AMBIGUITY):** For all multiple-choice questions ('mcq' and within 'reading'), 
 there must be only ONE single, unambiguously correct answer. The other three options (distractors) must be clearly and definitively wrong.
 
-**CRITICAL RULE 3 (NO SUBJECTIVITY - ALL TYPES):** Absolutely NO subjective questions asking about personal preferences, likes, 
-favorites, or opinions (e.g., "What's your favourite...", "Do you like...", "My favourite is ___.", "I like to ___."). 
-This applies strictly to ALL question types, including 'mcq', 'fill', and 'writing'. All questions and required answers MUST be objective 
-and verifiable based ONLY on the provided curriculum data or explicit context within the question itself.
+**CRITICAL RULE 3 (ABSOLUTELY NO SUBJECTIVITY - ALL TYPES):** It is FORBIDDEN to generate any questions asking about personal preferences, likes, 
+favorites, or opinions. Do NOT use phrases like "What's your favourite...", "Do you like...", "My favourite is ___.", "I like to ___.", etc.
+All questions and required answers MUST be 100% objective and verifiable based ONLY on the provided curriculum data or explicit context.
+- Bad (Forbidden): "What's your favourite sport? It's ___."
+- Good (Objective): "A sport played on a table with paddles is called ___." (Assuming 'table tennis' is in vocabulary)
+- Good (Objective): "He likes ___. (Hint: It's a sport)." (Assuming the context provides 'he')
 
 **CRITICAL RULE 4 (UNIQUE MATCHING ITEMS):** For 'match' questions, ALL items in the left column ('q' in pairs) MUST be unique, and ALL items in the right column ('a' in pairs) MUST be unique. Do NOT repeat items within the same column.
 - **Bad Example (Duplicate 'a'):** pairs: [{{"q": "Hi, I'm", "a": "Bill"}}, {{"q": "Bye,", "a": "Bill"}}]
@@ -657,6 +659,7 @@ and verifiable based ONLY on the provided curriculum data or explicit context wi
     - Good (Contextual Fill): 'A ___ flies in the sky.' (Answer: kite)
     - Good (Contextual Writing): 'Look at the apple. It's ___.' (Answer: red)
     - Good (Contextual Writing): 'He works on a farm. He is a ___.' (Answer: farmer)
+    - **Furthermore, for any question ('fill' or 'writing') where the "question" field contains a blank '___', the "answer" field in the JSON MUST ONLY contain the exact word(s) that fit the blank. Do NOT include the rest of the sentence.**
         
 **CURRICULUM DATA FOR THIS SPECIFIC UNIT ({unit_name}):**
 ---
